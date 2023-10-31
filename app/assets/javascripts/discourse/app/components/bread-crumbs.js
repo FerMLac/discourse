@@ -10,25 +10,18 @@ export default Component.extend({
   editingCategory: false,
   editingCategoryTab: null,
 
-  @discourseComputed("categories")
-  filteredCategories(categories) {
-    return categories.filter(
-      (category) =>
-        this.siteSettings.allow_uncategorized_topics ||
-        category.id !== this.site.uncategorized_category_id
-    );
-  },
-
-  @discourseComputed(
-    "category.ancestors",
-    "filteredCategories",
-    "noSubcategories"
-  )
-  categoryBreadcrumbs(categoryAncestors, filteredCategories, noSubcategories) {
+  @discourseComputed("category.ancestors", "noSubcategories")
+  categoryBreadcrumbs(categoryAncestors, noSubcategories) {
     categoryAncestors = categoryAncestors || [];
     const parentCategories = [undefined, ...categoryAncestors];
     const categories = [...categoryAncestors, undefined];
     const zipped = parentCategories.map((x, i) => [x, categories[i]]);
+
+    const filteredCategories = this.site.categories.filter(
+      (category) =>
+        this.siteSettings.allow_uncategorized_topics ||
+        category.id !== this.site.uncategorized_category_id
+    );
 
     return zipped.map((record) => {
       const [parentCategory, category] = record;
@@ -44,7 +37,7 @@ export default Component.extend({
         options,
         isSubcategory: !!parentCategory,
         noSubcategories: !category && noSubcategories,
-        hasOptions: options.length !== 0,
+        hasOptions: !category || category.has_children,
       };
     });
   },

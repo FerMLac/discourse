@@ -334,10 +334,7 @@ class CategoriesController < ApplicationController
         ) if term.present?
 
     categories =
-      categories.where(
-        "id = :id OR parent_category_id = :id",
-        id: parent_category_id,
-      ) if parent_category_id.present?
+      categories.where(parent_category_id: parent_category_id) if parent_category_id.present?
 
     categories =
       categories.where.not(id: SiteSetting.uncategorized_category_id) if !include_uncategorized

@@ -56,6 +56,37 @@ export default ComboBoxComponent.extend({
     return this.options.subCategory || false;
   }),
 
+  shortcuts: computed(
+    "value",
+    "selectKit.options.{subCategory,noSubcategories}",
+    function () {
+      const shortcuts = [];
+
+      if (
+        (this.value && !this.editingCategory) ||
+        (this.selectKit.options.noSubcategories &&
+          this.selectKit.options.subCategory)
+      ) {
+        shortcuts.push({
+          id: ALL_CATEGORIES_ID,
+          name: this.allCategoriesLabel,
+        });
+      }
+
+      if (
+        this.selectKit.options.subCategory &&
+        (this.value || !this.selectKit.options.noSubcategories)
+      ) {
+        shortcuts.push({
+          id: NO_CATEGORIES_ID,
+          name: this.noCategoriesLabel,
+        });
+      }
+
+      return shortcuts;
+    }
+  ),
+
   categoriesWithShortcuts: computed(
     "categories.[]",
     "value",
@@ -140,15 +171,17 @@ export default ComboBoxComponent.extend({
 
     if (this.siteSettings.lazy_load_categories) {
       const results = await Category.asyncSearch(filter, { ...opts, limit: 5 });
-      return results.sort((a, b) => {
-        if (a.parent_category_id && !b.parent_category_id) {
-          return 1;
-        } else if (!a.parent_category_id && b.parent_category_id) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
+      return this.shortcuts.concat(
+        results.sort((a, b) => {
+          if (a.parent_category_id && !b.parent_category_id) {
+            return 1;
+          } else if (!a.parent_category_id && b.parent_category_id) {
+            return -1;
+          } else {
+            return 0;
+          }
+        })
+      );
     }
 
     if (filter) {
