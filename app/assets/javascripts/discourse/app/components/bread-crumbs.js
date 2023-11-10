@@ -1,10 +1,12 @@
 import Component from "@ember/component";
 import { filter } from "@ember/object/computed";
+import { inject as service } from "@ember/service";
 import deprecated from "discourse-common/lib/deprecated";
 import discourseComputed from "discourse-common/utils/decorators";
 
 //  A breadcrumb including category drop downs
 export default Component.extend({
+  site: service(),
   classNameBindings: ["hidden:hidden", ":category-breadcrumb"],
   tagName: "ol",
   editingCategory: false,
@@ -12,16 +14,16 @@ export default Component.extend({
 
   @discourseComputed("category.ancestors", "noSubcategories")
   categoryBreadcrumbs(categoryAncestors, noSubcategories) {
-    categoryAncestors = categoryAncestors || [];
-    const parentCategories = [undefined, ...categoryAncestors];
-    const categories = [...categoryAncestors, undefined];
-    const zipped = parentCategories.map((x, i) => [x, categories[i]]);
-
     const filteredCategories = this.site.categories.filter(
       (category) =>
         this.siteSettings.allow_uncategorized_topics ||
         category.id !== this.site.uncategorized_category_id
     );
+
+    categoryAncestors = categoryAncestors || [];
+    const parentCategories = [undefined, ...categoryAncestors];
+    const categories = [...categoryAncestors, undefined];
+    const zipped = parentCategories.map((x, i) => [x, categories[i]]);
 
     return zipped.map((record) => {
       const [parentCategory, category] = record;
@@ -37,7 +39,7 @@ export default Component.extend({
         options,
         isSubcategory: !!parentCategory,
         noSubcategories: !category && noSubcategories,
-        hasOptions: !category || category.has_children,
+        hasOptions: !parentCategory || parentCategory.has_children,
       };
     });
   },

@@ -299,6 +299,21 @@ class CategoriesController < ApplicationController
     render json: success_json.merge(groups: groups || [])
   end
 
+  def find
+    category = Category.find_by_slug_path_with_id(params[:category_slug_path_with_id])
+    raise Discourse::NotFound if !category.present?
+
+    render json: {
+             category: SiteCategorySerializer.new(category, scope: guardian, root: nil),
+             ancestors:
+               ActiveModel::ArraySerializer.new(
+                 category.ancestors,
+                 scope: guardian,
+                 each_serializer: SiteCategorySerializer,
+               ),
+           }
+  end
+
   def search
     term = params[:term].to_s.strip
     parent_category_id = params[:parent_category_id].to_i if params[:parent_category_id].present?
@@ -355,7 +370,7 @@ class CategoriesController < ApplicationController
       END
     SQL
 
-    categories.order(:id)
+    categories = categories.order(:id)
 
     render json: categories, each_serializer: SiteCategorySerializer
   end

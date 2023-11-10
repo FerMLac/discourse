@@ -592,6 +592,26 @@ class Category < ActiveRecord::Base
     SQL
   end
 
+  def ancestors
+    Category.where(<<~SQL, category_id: self.id)
+      id != :category_id
+      AND
+      id IN (
+        WITH RECURSIVE ancestors(category_id) AS (
+          SELECT :category_id
+
+          UNION ALL
+
+          SELECT parent_category_id
+          FROM categories, ancestors
+          WHERE id = ancestors.category_id
+        )
+
+        SELECT category_id FROM ancestors
+      )
+    SQL
+  end
+
   def parent_category_validator
     if parent_category_id
       errors.add(:base, I18n.t("category.errors.uncategorized_parent")) if uncategorized?
