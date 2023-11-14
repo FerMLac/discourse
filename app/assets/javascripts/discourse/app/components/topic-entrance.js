@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import $ from "jquery";
 import DiscourseURL from "discourse/lib/url";
 import CleansUp from "discourse/mixins/cleans-up";
+import { isTesting } from "discourse-common/config/environment";
 import discourseComputed, { bind } from "discourse-common/utils/decorators";
 import I18n from "discourse-i18n";
 
@@ -168,7 +169,7 @@ export default Component.extend(CleansUp, {
   _jumpTo(destination) {
     this.session.set("lastTopicIdViewed", {
       topicId: this.topic.id,
-      historyUuid: this.router.location.getState?.().uuid,
+      historyUuid: isTesting() ? null : window.history.state?.uuid,
     });
 
     this.cleanUp();

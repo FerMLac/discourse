@@ -9,6 +9,7 @@ import $ from "jquery";
 import { topicTitleDecorators } from "discourse/components/topic-title";
 import { wantsNewWindow } from "discourse/lib/intercept-click";
 import DiscourseURL, { groupPath } from "discourse/lib/url";
+import { isTesting } from "discourse-common/config/environment";
 import { RUNTIME_OPTIONS } from "discourse-common/lib/raw-handlebars-helpers";
 import { findRawTemplate } from "discourse-common/lib/raw-templates";
 import discourseComputed, {
@@ -38,7 +39,6 @@ export function showEntrance(e) {
 
 export function navigateToTopic(topic, href) {
   const owner = getOwner(this);
-  const router = owner.lookup("service:router");
   const session = owner.lookup("service:session");
   const siteSettings = owner.lookup("service:site-settings");
   const appEvents = owner.lookup("service:appEvents");
@@ -51,7 +51,7 @@ export function navigateToTopic(topic, href) {
 
   session.set("lastTopicIdViewed", {
     topicId: topic.id,
-    historyUuid: router.location.getState?.().uuid,
+    historyUuid: isTesting() ? null : window.history.state?.uuid,
   });
 
   DiscourseURL.routeTo(href || topic.get("url"));
@@ -359,7 +359,7 @@ export default Component.extend({
     const isLastViewedTopic =
       lastViewedTopicInfo?.topicId === this.topic.id &&
       lastViewedTopicInfo?.historyUuid ===
-        this.router.location.getState?.().uuid;
+        (isTesting() ? null : window.history.state?.uuid);
 
     if (isLastViewedTopic) {
       this.session.set("lastTopicIdViewed", null);

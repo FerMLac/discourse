@@ -44,7 +44,7 @@ export default class RouteScrollManager extends Service {
       return;
     }
 
-    const newUuid = this.router.location.getState?.().uuid;
+    const newUuid = isTesting() ? null : window.history.state?.uuid;
 
     if (newUuid === this.uuid) {
       // routeDidChange fired without the history state actually changing. Most likely a refresh.
