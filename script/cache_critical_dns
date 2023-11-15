@@ -170,6 +170,9 @@ class SRVName
       [].tap do |addresses|
         targets = dns_client.getresources(@name, Resolv::DNS::Resource::IN::SRV)
         targets.delete_if { |t| !@prio_filter.within_threshold?(t.priority) }
+        # Targets are resolved in reverse priority order, so they are
+        # considered the first_seen in the ResolverCache entry.
+        targets.sort_by!(&:priority).reverse!
         addresses.concat(targets.map { |t| Name.new(t.target.to_s).resolve }.flatten)
       end
     end
