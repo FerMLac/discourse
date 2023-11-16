@@ -92,12 +92,10 @@ class NewPostManager
       return :post_count
     end
 
+    puts "TL: #{user.trust_level}, GR: #{user.groups.pluck(:id)}, AG: #{allowed_groups}"
+    puts "CHECK: #{(user.groups.pluck(:id) & self.allowed_groups)}"
     #return :trust_level if user.trust_level < SiteSetting.approve_unless_trust_level.to_i
-    if (
-         user.groups.pluck(:id) & SiteSetting.approve_unless_allowed_groups.split("|").map(&:to_i)
-       ).any?
-      return :group
-    end
+    return :group if user.groups.blank? || (user.groups.pluck(:id) & self.allowed_groups).empty?
 
     if (
          manager.args[:title].present? &&
@@ -325,6 +323,14 @@ class NewPostManager
   end
 
   private
+
+  def self.allowed_groups
+    if SiteSetting.approve_unless_allowed_groups.is_a?(String)
+      SiteSetting.approve_unless_allowed_groups.split("|").map(&:to_i)
+    else
+      [SiteSetting.approve_unless_allowed_groups]
+    end
+  end
 
   def self.approve_unless_allowed_groups_is_trust_level_0
     if SiteSetting.approve_unless_allowed_groups.is_a?(String)
