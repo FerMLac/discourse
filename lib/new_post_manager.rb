@@ -95,7 +95,7 @@ class NewPostManager
     puts "TL: #{user.trust_level}, GR: #{user.groups.pluck(:id)}, AG: #{allowed_groups}"
     puts "CHECK: #{(user.groups.pluck(:id) & self.allowed_groups)}"
     #return :trust_level if user.trust_level < SiteSetting.approve_unless_trust_level.to_i
-    return :group if user.groups.blank? || (user.groups.pluck(:id) & self.allowed_groups).empty?
+    return :group if user.groups.any? && (user.groups.pluck(:id) & self.allowed_groups).empty?
 
     if (
          manager.args[:title].present? &&

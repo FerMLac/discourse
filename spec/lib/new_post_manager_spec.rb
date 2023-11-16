@@ -3,11 +3,10 @@
 require "new_post_manager"
 
 RSpec.describe NewPostManager do
-  fab!(:user)
+  fab!(:user) { Fabricate(:user, refresh_auto_groups: true) }
   fab!(:topic)
 
   describe "default action" do
-    before { Group.refresh_automatic_groups! }
     it "creates the post by default" do
       manager = NewPostManager.new(user, raw: "this is a new post", topic_id: topic.id)
       result = manager.perform
