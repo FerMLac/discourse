@@ -728,6 +728,7 @@ class Group < ActiveRecord::Base
   end
 
   def self.user_trust_level_change!(user_id, trust_level)
+    puts "ID: #{user_id}, TL: #{trust_level}"
     desired = desired_trust_level_groups(trust_level)
     undesired = trust_group_ids - desired
 
