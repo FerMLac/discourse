@@ -9,6 +9,7 @@ describe "Composer using review_media", type: :system do
   before do
     SiteSetting.review_media_unless_trust_level = 3
     sign_in user
+    Group.refresh_automatic_groups!
   end
 
   it "does not flag a post with an emoji" do
