@@ -222,7 +222,7 @@ RSpec.describe NewPostManager do
       it "will return an enqueue result" do
         npm =
           NewPostManager.new(
-            Fabricate(:user),
+            user,
             title: "this is a new topic title",
             raw: "this is the raw content",
             category: Fabricate(:category).id,
